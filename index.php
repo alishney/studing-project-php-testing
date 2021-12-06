@@ -22,6 +22,7 @@ include './questions.php'
 </head>
 
 <body>
+    <!--  Генерируем форму на основании массива questions  -->
     <form action="results_page.php" method="POST">
         <?php foreach ($questions as $index => $question) { ?>
             <div class="border p-4 rounded my-5 bg-light shadow-sm question-card user-select-none">
@@ -40,26 +41,8 @@ include './questions.php'
                 <?php } ?>
             </div>
         <?php } ?>
-        <input type="hidden" name="pageLeavesCount" value="0">
         <button class="btn btn-primary" type="submit">Завершить тест</button>
     </form>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-    <script>
-        document.querySelectorAll('input[type=radio]').forEach((radioButton) => {
-            radioButton.addEventListener('change', (e) => {
-                e.currentTarget.closest('.question-card').classList.add('has-answer')
-            })
-        })
-
-        window.addEventListener('blur', (() => {
-            const leavesCountInput = document.querySelector('input[type=hidden][name=pageLeavesCount]')
-            let leavesCount = 0
-            return () => {
-                leavesCount++;
-                leavesCountInput.value = leavesCount
-            }
-        })())
-    </script>
 </body>
 
 </html>

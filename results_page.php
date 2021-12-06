@@ -1,7 +1,27 @@
 <?php
+/**
+ * Данные с страницы теста приходят сюда
+ * в массиве $_POST в формате массива
+ * [
+ *      "id вопроса" => "ответ который выбрал студент,
+ *      "id вопроса" => "ответ который выбрал студент,
+ *      "id вопроса" => "ответ который выбрал студент,
+ *      ...
+ * ]
+ */
 
+/**
+ * Подключаем исходные ответы что-бы
+ * сравнивать ответ ученика с
+ * правильным ответом
+ */
 include './questions.php';
 
+
+/**
+ * Функция которая принимает в себя массив
+ * с вопросами, и ищет в нем вопрос по его id
+ */
 function findQuestionById(string $questionId, array $questions)
 {
     foreach ($questions as $question) {
@@ -11,39 +31,55 @@ function findQuestionById(string $questionId, array $questions)
     }
 }
 
-$totalPoints   = 0;
+/**
+ * Всего правильных ответов которые набрал ученик
+ */
+$totalPoints = 0;
+
+/**
+ * В эту переменную будут добавляться
+ * ряды с данными для html таблицы
+ * сделал это что бы сгенерировать html отдельно
+ * и не устраивать кашу php и html
+ */
 $htmlTableRows = '';
 
+/**
+ * Проходим массив данных POST и
+ */
 foreach ($_POST as $questionId => $studentAnswer) {
+    /** Ищем вопрос по его id */
     $question = findQuestionById($questionId, $questions);
-    if ( ! $question) {
-        continue;
-    }
-    $correctAnswer        = array_search(true, $question['answers']);
-    $studentAnswerCorrect = $correctAnswer == $studentAnswer;
+    /** получаем корректный ответ на этот вопрос */
+    $correctAnswer = array_search(true, $question['answers']);
+    /**
+     * сравниваем ответ студента и правильный ответ из исходных днных,
+     * и результат этого сравнения заносим в эту переменную
+     */
+    $studentAnswerIsCorrect = $correctAnswer == $studentAnswer;
 
-    if ($studentAnswerCorrect) {
+    /** добавляем очки если ответ студента совпадает с правильным */
+    if ($studentAnswerIsCorrect) {
         $totalPoints++;
     }
 
-    $rowColor = $studentAnswerCorrect ? 'table-success' : 'table-danger';
-
+    /**
+     * добавляем к рядам таблицы еще один, это по сути строка,
+     * называется HEREDOC, этот синтаксис используется когда надо большие строки делать
+     * по итогу мы просто добавляем к переменной еще одну строку в которой html ряд таблицы
+     * просто строка обычная, тип string
+     */
     $htmlTableRows .= <<<ROW
                     <tr>
                         <td>{$question['question']}</td>
                         <td>{$correctAnswer}</td>
-                        <td class="{$rowColor}">{$studentAnswer}</td>
+                        <td>{$studentAnswer}</td>
                     <tr/>
                 ROW;
 }
 
-$percents   = ($totalPoints / count($questions)) * 100 . '%';
-$qrCodeData = urlencode('Результат ученика: ' . $percents);
-$dataUrl    = 'data:image/jpg;base64,' . base64_encode(
-        file_get_contents(
-            "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={$qrCodeData}"
-        )
-    );
+/** дополнительно посчитал проценты, нет необходдимости, для красоты */
+$percents = ($totalPoints / count($questions)) * 100 . '%';
 ?>
 
 
@@ -61,20 +97,13 @@ $dataUrl    = 'data:image/jpg;base64,' . base64_encode(
         table tr > *:not(:first-child) {
             white-space: nowrap;
         }
-
-        .qr-code {
-            opacity: .7;
-            border: 1px solid lightgray;
-            padding: .8rem;
-        }
     </style>
 </head>
 
 <body class="p-5">
 <div class="container">
-    <div>
-        <img class="float-end mb-4 qr-code" src="<?= $dataUrl ?>" alt='Ошибка генерации QR кода проверки'/>
-    </div>
+    <!--  Во всей этой таблице нет необходимости, её можно убрать и вместо нее просто вывести $totalPoints, или как-то по своему  -->
+    <!-- ======================================================================================================================== -->
     <table class="table table-bordered text-secondary">
         <tbody>
         <tr>
@@ -82,14 +111,11 @@ $dataUrl    = 'data:image/jpg;base64,' . base64_encode(
             <th>Правильный ответ</th>
             <th>Ответ ученика</th>
         </tr>
+        <!-- Выводим сюда ряды таблицы которые в php собирали -->
         <?= $htmlTableRows ?>
         <tr class="fw-bold">
             <td colspan="2">Итог</td>
             <td><?= $totalPoints ?> / <?= count($questions) ?> вопросов (<?= $percents ?>)</td>
-        </tr>
-        <tr class="fw-bold">
-            <td colspan="2">Сколько раз пользователь покидал страницу *</td>
-            <td><?= $_POST['pageLeavesCount'] ?></td>
         </tr>
         </tbody>
     </table>
@@ -97,6 +123,7 @@ $dataUrl    = 'data:image/jpg;base64,' . base64_encode(
         <p class="text-muted"><small>* примите во внимание что не на всех устройствах эта функция работает точно, и даже
                 случайный клик за пределы области браузера может привести к её срабатыванию</small></p>
     </div>
+    <!-- ======================================================================================================================== -->
 </div>
 </body>
 
