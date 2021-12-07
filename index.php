@@ -42,7 +42,7 @@ include './questions.php'
 <body>
     <!--  Генерируем форму на основании массива questions  -->
     <h1>Тест по инженерной графике</h1>
-    <form action="results_page.php" method="POST">
+    <form action="result.php" method="POST">
         <?php foreach ($questions as $index => $question) { ?>
         <div>
             <?php if (isset($question['img'])) { ?>
